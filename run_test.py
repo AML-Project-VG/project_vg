@@ -39,7 +39,6 @@ model = network.GeoLocalizationNet(args)
 model = model.to(args.device)
 
 # Test best model on test set
-
 model_state_dict = torch.load(
     args.test_model_path)["model_state_dict"]
 model.load_state_dict(model_state_dict)
