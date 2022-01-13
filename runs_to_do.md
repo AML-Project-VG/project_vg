@@ -17,7 +17,7 @@
 | 10         | 64           | 0.00001  | Y (8)         | Adam       | 78.1         | **77.6**      | [example](Runs\netvlad_10_0.00001_64)     |
 | 10         | 64           | 0.0001   | N (10)        | Adam       | 76.2         | 75.2          | [example](Runs\netvlad_10_0.0001_64)      |
 | 10         | 64           | 0.00001  | Y (4)         | SGD m=0.9  | 38.4         | 46.4          | [example](Runs\netvlad_sgd_m_0.9_epoc_10) |
-| 10         | 64           | 0.00001  | Y (4)         | SGD m=0.99 | 43.7         | 52.8          | [example](Runs\nevlad_sgd_m_0.99_epoc_10) |
+| 10         | 64           | 0.00001  | N (10)        | SGD m=0.99 | 43.7         | 52.8          | [example](Runs\nevlad_sgd_m_0.99_epoc_10) |
 | 10         | 64           | 0.00001  | N (10)        | Adagrad    | 60.7         | 67.0          | [example](Runs\netvlad_adagrad_std_10)    |
 
 ### GeM
