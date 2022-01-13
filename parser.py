@@ -6,6 +6,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Benchmarking Visual Geolocalization",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # Training parameters
+    parser.add_argument("--backbone", type=str,
+                        default="resnet18", choices=["resnet18", "resnet50"])
     parser.add_argument("--use_netvlad", type=bool,
                         help="Specify if NetVLAD must be used")
 
@@ -73,6 +75,9 @@ def parse_arguments():
 
     parser.add_argument("--test_model_path", type=str,
                         help="Path for the model to use for evaluation")
+
+   
+
 
     args = parser.parse_args()
 

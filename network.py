@@ -5,6 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from netvlad import NetVLAD
 from gem import GeM
+import h5py
+from os.path import join
 
 
 class GeoLocalizationNet(nn.Module):
@@ -19,8 +21,16 @@ class GeoLocalizationNet(nn.Module):
 
         if args.use_gem:
             self.aggregation= GeM(p = args.gem_p, eps = args.gem_eps)
-        if args.use_netvlad:
+        
+        elif args.use_netvlad:
+            initcache = join(args.datasets_folder, 'centroids_' + str(args.netvlad_clusters) + '_' + str(args.backbone) + '_desc_cen.hdf5')
             self.aggregation = NetVLAD(num_clusters=args.netvlad_clusters)
+            with h5py.File(initcache, mode='r') as h5: 
+                    clsts = h5.get("centroids")[...]
+                    traindescs = h5.get("descriptors")[...]
+                    self.aggregation.init_params(clsts, traindescs) 
+                    del clsts, traindescs
+        
         else:
             self.aggregation = nn.Sequential(L2Norm(),
                                              torch.nn.AdaptiveAvgPool2d(1),
