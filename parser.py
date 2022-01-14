@@ -76,9 +76,6 @@ def parse_arguments():
     parser.add_argument("--test_model_path", type=str,
                         help="Path for the model to use for evaluation")
 
-   
-
-
     args = parser.parse_args()
 
     if args.queries_per_epoch % args.cache_refresh_rate != 0:

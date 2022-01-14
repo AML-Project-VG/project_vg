@@ -1,4 +1,3 @@
-from matplotlib.cbook import flatten
 import torch
 import logging
 import torchvision
@@ -21,17 +20,20 @@ class GeoLocalizationNet(nn.Module):
         self.backbone = get_backbone(args)
 
         if args.use_gem:
-            self.aggregation= nn.Sequential(GeM(p = args.gem_p, eps = args.gem_eps), Flatten(), L2Norm())
-        
+            self.aggregation = nn.Sequential(
+                GeM(p=args.gem_p, eps=args.gem_eps), Flatten(), L2Norm())
+
         elif args.use_netvlad:
-            initcache = join(args.datasets_folder, 'centroids_' + str(args.netvlad_clusters) + '_' + str(args.backbone) + '_desc_cen.hdf5')
-            self.aggregation = NetVLAD(num_clusters=args.netvlad_clusters, dim=args.features_dim)
-            with h5py.File(initcache, mode='r') as h5: 
-                    clsts = h5.get("centroids")[...]
-                    traindescs = h5.get("descriptors")[...]
-                    self.aggregation.init_params(clsts, traindescs) 
-                    del clsts, traindescs
-        
+            initcache = join(args.datasets_folder, 'centroids_' + str(
+                args.netvlad_clusters) + '_' + str(args.backbone) + '_desc_cen.hdf5')
+            self.aggregation = NetVLAD(
+                num_clusters=args.netvlad_clusters, dim=args.features_dim)
+            with h5py.File(initcache, mode='r') as h5:
+                clsts = h5.get("centroids")[...]
+                traindescs = h5.get("descriptors")[...]
+                self.aggregation.init_params(clsts, traindescs)
+                del clsts, traindescs
+
         else:
             self.aggregation = nn.Sequential(L2Norm(),
                                              torch.nn.AdaptiveAvgPool2d(1),
@@ -58,7 +60,7 @@ def get_backbone(args):
             "Train only conv4 of the ResNet-18 (remove conv5), freeze the previous ones")
         layers = list(backbone.children())[:-3]
         backbone = torch.nn.Sequential(*layers)
-        
+
     elif args.backbone == 'resnet50':
         features_dim = 2048
         backbone = torchvision.models.resnet50(pretrained=True)
@@ -71,8 +73,8 @@ def get_backbone(args):
             "Train only conv5 of the ResNet-50, freeze the previous ones")
         layers = list(backbone.children())[:-2]
         backbone = torch.nn.Sequential(*layers)
-    
-    elif args.backbone =='resnet50moco':
+
+    elif args.backbone == 'resnet50moco':
         features_dim = 2048
         backbone = torch.load('moco_v1_200ep_pretrain.pth.tar')
         for name, child in backbone.named_children():
@@ -84,7 +86,7 @@ def get_backbone(args):
             "Train only conv5 of the ResNet-50 trained by MoCo-v1 team, freeze the previous ones")
         layers = list(backbone.children())[:-2]
         backbone = torch.nn.Sequential(*layers)
-        
+
     args.features_dim = features_dim  # Number of output features from backbone
     return backbone
 
