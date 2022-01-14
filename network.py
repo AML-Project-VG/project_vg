@@ -25,7 +25,7 @@ class GeoLocalizationNet(nn.Module):
         
         elif args.use_netvlad:
             initcache = join(args.datasets_folder, 'centroids_' + str(args.netvlad_clusters) + '_' + str(args.backbone) + '_desc_cen.hdf5')
-            self.aggregation = NetVLAD(num_clusters=args.netvlad_clusters)
+            self.aggregation = NetVLAD(num_clusters=args.netvlad_clusters, dim=args.features_dim)
             with h5py.File(initcache, mode='r') as h5: 
                     clsts = h5.get("centroids")[...]
                     traindescs = h5.get("descriptors")[...]
@@ -63,32 +63,29 @@ def get_backbone(args):
         features_dim = 2048
         backbone = torchvision.models.resnet50(pretrained=True)
         for name, child in backbone.named_children():
-            if name == "layer5":
+            if name == "layer4":
                 break
             for params in child.parameters():
                 params.requires_grad = False
         logging.debug(
             "Train only conv5 of the ResNet-50, freeze the previous ones")
-        layers = list(backbone.children())
+        layers = list(backbone.children())[:-2]
         backbone = torch.nn.Sequential(*layers)
     
     elif args.backbone =='resnet50moco':
         features_dim = 2048
         backbone = torch.load('moco_v1_200ep_pretrain.pth.tar')
         for name, child in backbone.named_children():
-            if name == "layer5":
+            if name == "layer4":
                 break
             for params in child.parameters():
                 params.requires_grad = False
         logging.debug(
             "Train only conv5 of the ResNet-50 trained by MoCo-v1 team, freeze the previous ones")
-        layers = list(backbone.children())
+        layers = list(backbone.children())[:-2]
         backbone = torch.nn.Sequential(*layers)
-
-    if args.use_netvlad:
-        args.features_dim = features_dim * args.netvlad_clusters
-    else:
-        args.features_dim = 256  # Number of channels in conv4
+        
+    args.features_dim = features_dim  # Number of output features from backbone
     return backbone
 
 

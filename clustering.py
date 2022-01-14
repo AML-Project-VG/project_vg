@@ -1,24 +1,14 @@
 
-from __future__ import print_function
 from math import ceil
 from os.path import join, exists
 from os import makedirs
-import logging
 import torch
 from torch.utils.data import DataLoader, SubsetRandomSampler
 import h5py
 import faiss
 import numpy as np
-import parser
-import commons
-import datasets_ws
-import network
-from datetime import datetime
-import multiprocessing
-import torch.nn as nn
 
-def get_clusters(args, cluster_set, model, encoder_dim=256):
-    args = parser.parse_arguments()
+def get_clusters(args, cluster_set, model):
     nDescriptors = 50000
     nPerImage = 100
     nIm = ceil(nDescriptors/nPerImage)
@@ -29,21 +19,18 @@ def get_clusters(args, cluster_set, model, encoder_dim=256):
                 pin_memory=args.device,
                 sampler=sampler)
 
-    if not exists(join(args.datasets_folder, 'centroids')):
-        makedirs(join(args.datasets_folder, 'centroids'))
-
     initcache = join(args.datasets_folder, 'centroids_' + str(args.netvlad_clusters) + '_' + str(args.backbone) + '_desc_cen.hdf5')
     with h5py.File(initcache, mode='w') as h5: 
         with torch.no_grad():
             model.eval()
             print('====> Extracting Descriptors')
             dbFeat = h5.create_dataset("descriptors", 
-                        [nDescriptors, encoder_dim], 
+                        [nDescriptors, args.features_dim], 
                         dtype=np.float32)
 
             for iteration, (input, indices) in enumerate(data_loader, 1):
                 input = input.to(args.device)
-                image_descriptors = model(input).view(input.size(0), encoder_dim, -1).permute(0, 2, 1)
+                image_descriptors = model(input).view(input.size(0), args.features_dim, -1).permute(0, 2, 1)
 
                 batchix = (iteration-1)*args.infer_batch_size*nPerImage
                 for ix in range(image_descriptors.size(0)):
@@ -59,7 +46,7 @@ def get_clusters(args, cluster_set, model, encoder_dim=256):
         
         print('====> Clustering..')
         niter = 100
-        kmeans = faiss.Kmeans(encoder_dim, args.netvlad_clusters, niter=niter, verbose=False)
+        kmeans = faiss.Kmeans(args.features_dim, args.netvlad_clusters, niter=niter, verbose=False)
         kmeans.train(dbFeat[...])
 
         print('====> Storing centroids', kmeans.centroids.shape)
