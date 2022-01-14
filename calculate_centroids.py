@@ -15,6 +15,7 @@ import datasets_ws
 import network
 from datetime import datetime
 import multiprocessing
+import torch.nn as nn
 
 # Initial setup: parser, logging...
 args = parser.parse_arguments()
@@ -35,7 +36,7 @@ logging.debug(f"Loading dataset Pitts30k from folder {args.datasets_folder}")
 
 dataset = datasets_ws.BaseDataset(args, args.datasets_folder, "pitts30k", "train")
 
-def get_clusters(cluster_set, encoder_dim=256):
+def get_clusters(cluster_set, model, encoder_dim=256):
     args = parser.parse_arguments()
     nDescriptors = 50000
     nPerImage = 100
@@ -85,6 +86,7 @@ def get_clusters(cluster_set, encoder_dim=256):
         print('====> Done!')
 
 # Initialize model
-model = network.get_backbone(args)
+model =  nn.Sequential(network.get_backbone(args), network.L2Norm())
 model.to(args.device)
-get_clusters(dataset)
+
+get_clusters(dataset, model)
