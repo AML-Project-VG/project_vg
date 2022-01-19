@@ -1,6 +1,8 @@
+from cgi import print_directory
 import numpy as np
 import torch
 from torch import nn
+import torch.nn.functional as F
 from torch.nn import init
 
 
@@ -71,10 +73,11 @@ class CBAMBlock(nn.Module):
 
         ca_mask = self.ca(x)
         out = x*ca_mask
-
+        
         sa_mask = self.sa(out)
-        out = out*sa_mask
-
-        self.last_attention_mask = sa_mask*ca_mask
-
-        return out+residual
+        #out = out*sa_mask
+        sa_mask = F.interpolate(sa_mask, x.shape[2:])
+        reweight_mask = torch.flatten(sa_mask, 2)
+        self.last_attention_mask = reweight_mask
+    
+        return reweight_mask

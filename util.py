@@ -32,6 +32,7 @@ def save_attention_mask(images, masks):
     for i, axi in enumerate(ax.flat):
         image = inverse_normalize(tensor=images[i], mean=(
             0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)).permute(1, 2, 0)
+        print(masks[i].shape)
         mask = masks[i].reshape(mask_H, mask_W)
 
         filtered_mask = gaussian_filter(mask, 3)

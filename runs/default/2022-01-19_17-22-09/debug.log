@@ -1,0 +1,24 @@
+2022-01-19 17:22:09   Arguments: Namespace(upscale_input=False, downscale_input=False, augment_input='None', backbone='resnet18', use_netvlad=True, netvlad_clusters=64, use_gem=None, gem_p=3, gem_eps=1e-06, use_attention='cbam', attention_lr=0.0001, use_sgd=None, use_adagrad=None, momentum=0.9, train_batch_size=4, infer_batch_size=16, margin=0.1, epochs_num=20, patience=3, lr=1e-05, cache_refresh_rate=1000, queries_per_epoch=5000, negs_num_per_query=10, neg_samples_num=1000, seed=0, device='cuda', num_workers=8, val_positive_dist_threshold=25, train_positives_dist_threshold=10, recall_values=[1, 5, 10, 20], datasets_folder='./Dataset_pitts30k', exp_name='default', test_dataset_name=None, test_model_path=None, save_attention_mask=None, output_folder='runs/default/2022-01-19_17-22-09')
+2022-01-19 17:22:09   The outputs are being saved in runs/default/2022-01-19_17-22-09
+2022-01-19 17:22:09   Using 1 GPUs and 12 CPUs
+2022-01-19 17:22:09   Loading dataset Pitts30k from folder ./Dataset_pitts30k
+2022-01-19 17:22:09   There are 96 queries without any positives within the training set. They won't be considered as they're useless for training.
+2022-01-19 17:22:09   Train query set: < TripletsDataset, pitts30k - #database: 10000; #queries: 7320 >
+2022-01-19 17:22:09   Val set: < BaseDataset, pitts30k - #database: 10000; #queries: 7608 >
+2022-01-19 17:22:10   Test set: < BaseDataset, pitts30k - #database: 10000; #queries: 6816 >
+2022-01-19 17:22:10   Train only conv4 of the ResNet-18 (remove conv5), freeze the previous ones
+2022-01-19 17:22:16   Output dimension of the model is 16384
+2022-01-19 17:22:16   Start training epoch: 00
+2022-01-19 17:22:16   Cache: 0 / 5
+2022-01-19 17:25:49   Epoch[00](0/5): current batch triplet loss = 0.0375, average epoch triplet loss = 0.0368
+2022-01-19 17:25:49   Cache: 1 / 5
+2022-01-19 17:46:34   
+Traceback (most recent call last):
+  File "/home/franzhd/Aml_project/project_vg/run_train.py", line 97, in <module>
+    triplets_ds.compute_triplets(args, model)
+  File "/home/franzhd/Aml_project/project_vg/datasets_ws.py", line 253, in compute_triplets
+    neg_indexes = self.get_hardest_negatives_indexes(args, cache, query_features, neg_indexes)
+  File "/home/franzhd/Aml_project/project_vg/datasets_ws.py", line 221, in get_hardest_negatives_indexes
+    neg_features = cache[neg_samples]
+KeyboardInterrupt
+

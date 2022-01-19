@@ -57,9 +57,12 @@ class GeoLocalizationNet(nn.Module):
             reweight_mask = self.attention(x)
             if self.args.use_netvlad:
                 self.aggregation.set_reweight_mask(reweight_mask)
-        elif self.args.use_attention == "cbam":
-            x = self.attention(x)
 
+        elif self.args.use_attention == "cbam":
+            reweight_mask = self.attention(x)
+            if self.args.use_netvlad:
+                self.aggregation.set_reweight_mask(reweight_mask)
+                
         x = self.aggregation(x)
         return x
 
