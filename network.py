@@ -28,6 +28,7 @@ class GeoLocalizationNet(nn.Module):
             self.attention = CRN(args)
         elif args.use_attention == "cbam":
             self.attention = CBAMBlock(channel=args.features_dim)
+            self.attention.init_weights()
 
         if args.use_gem:
             self.aggregation = nn.Sequential(
@@ -53,12 +54,7 @@ class GeoLocalizationNet(nn.Module):
     def forward(self, x):
         x = self.backbone(x)
 
-        if self.args.use_attention == "crn":
-            reweight_mask = self.attention(x)
-            if self.args.use_netvlad:
-                self.aggregation.set_reweight_mask(reweight_mask)
-
-        elif self.args.use_attention == "cbam":
+        if self.args.use_attention == "crn" or self.args.use_attention == "cbam":
             reweight_mask = self.attention(x)
             if self.args.use_netvlad:
                 self.aggregation.set_reweight_mask(reweight_mask)

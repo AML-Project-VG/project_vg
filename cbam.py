@@ -76,7 +76,7 @@ class CBAMBlock(nn.Module):
         
         sa_mask = self.sa(out)
         #out = out*sa_mask
-        sa_mask = F.interpolate(sa_mask, x.shape[2:])
+        reweight_mask = F.interpolate(out, x.shape[2:])
         reweight_mask = torch.flatten(sa_mask, 2)
         self.last_attention_mask = reweight_mask
     
