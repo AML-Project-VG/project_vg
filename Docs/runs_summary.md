@@ -123,15 +123,15 @@
 
 ### NetVLAD PC ResNet50
 
-| Train from layer | Max epochs | LR      | Stopped Early | Augmentation | Optimizer | Best R@5 Val | Best R@5 Test | Link                                                     |
-| ---------------- | ---------- | ------- | ------------- | ------------ | --------- | ------------ | ------------- | -------------------------------------------------------- |
-| 4                | 20         | 0.00001 | Y (5)         | x            | Adam      | 96.8         | 92.9          | [example](/Runs/netvlad_20_64_10e-5_adam_resnet50-conv4) |
+| Train from layer | Max epochs | LR      | Stopped Early | Optimizer | Best R@5 Val | Best R@5 Test | Link                                                     |
+| ---------------- | ---------- | ------- | ------------- | --------- | ------------ | ------------- | -------------------------------------------------------- |
+| 4                | 20         | 0.00001 | Y (5)         | Adam      | 96.8         | 92.9          | [example](/Runs/netvlad_20_64_10e-5_adam_resnet50-conv4) |
 
 ### NetVLAD PC ResNet50MoCo
 
-| Train from layer | Max epochs | LR      | Stopped Early | Augmentation | Optimizer | Best R@5 Val | Best R@5 Test | Link                                                                   |
-| ---------------- | ---------- | ------- | ------------- | ------------ | --------- | ------------ | ------------- | ---------------------------------------------------------------------- |
-| 4                | 20         | 0.00001 | Y (5)         | x            | Adam      | 95.7         | 92.4          | [example](/Runs/netvlad_20_64_10e-5_adam_downscale_resnet50moco-conv4) |
+| Train from layer | Max epochs | LR      | Stopped Early | Optimizer | Best R@5 Val | Best R@5 Test | Link                                                         |
+| ---------------- | ---------- | ------- | ------------- | --------- | ------------ | ------------- | ------------------------------------------------------------ |
+| 4                | 20         | 0.00001 | Y (5)         | Adam      | 95.8         | 92.2          | [example](/Runs/netvlad_20_64_10e-5_adam_resnet50moco-conv4) |
 
 ## LR
 
