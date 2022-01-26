@@ -3,7 +3,7 @@ import logging
 import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
-from cbam import CBAMBlock
+from cbam import CBAMBlock, CBAModBlock
 from crn import CRN
 from netvlad import NetVLAD
 from gem import GeM
@@ -28,6 +28,9 @@ class GeoLocalizationNet(nn.Module):
             self.attention = CRN(args)
         elif args.use_attention == "cbam":
             self.attention = CBAMBlock(channel=args.features_dim)
+            self.attention.init_weights()
+        elif args.use_attention == "cbamod":
+            self.attention = CBAModBlock(channel=args.features_dim)
             self.attention.init_weights()
 
         if args.use_gem:
@@ -54,11 +57,13 @@ class GeoLocalizationNet(nn.Module):
     def forward(self, x):
         x = self.backbone(x)
 
-        if self.args.use_attention == "crn" or self.args.use_attention == "cbam":
+        if self.args.use_attention == "crn" or self.args.use_attention == "cbamod":
             reweight_mask = self.attention(x)
             if self.args.use_netvlad:
                 self.aggregation.set_reweight_mask(reweight_mask)
-                
+        elif self.args.use_attention == "cbam":
+            x = self.attention(x)
+
         x = self.aggregation(x)
         return x
 

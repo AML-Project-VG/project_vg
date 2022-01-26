@@ -1,9 +1,7 @@
-from cgi import print_directory
-import numpy as np
-import torch
-from torch import nn
-import torch.nn.functional as F
 from torch.nn import init
+import torch.nn.functional as F
+from torch import nn
+import torch
 
 
 class ChannelAttention(nn.Module):
@@ -73,11 +71,48 @@ class CBAMBlock(nn.Module):
 
         ca_mask = self.ca(x)
         out = x*ca_mask
-        
+
         sa_mask = self.sa(out)
-        #out = out*sa_mask
-        reweight_mask = F.interpolate(out, x.shape[2:])
+        out = out*sa_mask
+
+        self.last_attention_mask = sa_mask
+
+        return out+residual
+
+
+class CBAModBlock(nn.Module):
+
+    def __init__(self, channel=512, reduction=16, kernel_size=7):
+        super().__init__()
+        self.ca = ChannelAttention(channel=channel, reduction=reduction)
+        self.sa = SpatialAttention(kernel_size=kernel_size)
+        self.last_attention_mask = None
+
+    def init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                init.kaiming_normal_(m.weight, mode='fan_out')
+                if m.bias is not None:
+                    init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                init.constant_(m.weight, 1)
+                init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                init.normal_(m.weight, std=0.001)
+                if m.bias is not None:
+                    init.constant_(m.bias, 0)
+
+    def get_last_attention_mask(self):
+        return self.last_attention_mask
+
+    def forward(self, x):
+
+        ca_mask = self.ca(x)
+        out = x*ca_mask
+
+        sa_mask = self.sa(out)
+
         reweight_mask = torch.flatten(sa_mask, 2)
         self.last_attention_mask = reweight_mask
-    
+
         return reweight_mask
