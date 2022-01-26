@@ -30,7 +30,7 @@ def parse_arguments():
                         help="Epsilon for GeM")
 
     parser.add_argument("--use_attention", type=str,
-                        choices=["crn", "cbam"], help="Specify if an attention layer must be used")
+                        choices=["crn", "cbam", "cbamod"], help="Specify if an attention layer must be used")
 
     parser.add_argument("--attention_lr", type=float, default=0.001,
                         help="Specify the learning rate to use for the attention layer")
