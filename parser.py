@@ -29,6 +29,12 @@ def parse_arguments():
     parser.add_argument("--gem_eps", type=float, default=0.000001,
                         help="Epsilon for GeM")
 
+    parser.add_argument("--use_attention", type=str,
+                        choices=["crn", "cbam"], help="Specify if an attention layer must be used")
+
+    parser.add_argument("--attention_lr", type=float, default=0.001,
+                        help="Specify the learning rate to use for the attention layer")
+
     parser.add_argument("--use_sgd", type=bool,
                         help="Specify if optimizer sgd must be used")
 
@@ -81,6 +87,9 @@ def parse_arguments():
 
     parser.add_argument("--test_model_path", type=str,
                         help="Path for the model to use for evaluation")
+
+    parser.add_argument("--save_attention_mask",  type=bool,
+                        help="Specify if the masks used for attention must be saved")
 
     args = parser.parse_args()
 

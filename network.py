@@ -3,6 +3,8 @@ import logging
 import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
+from cbam import CBAMBlock
+from crn import CRN
 from netvlad import NetVLAD
 from gem import GeM
 import h5py
@@ -17,12 +19,20 @@ class GeoLocalizationNet(nn.Module):
 
     def __init__(self, args):
         super().__init__()
+        self.args = args
+
         self.backbone = get_backbone(args)
+
+        self.attention = None
+        if args.use_attention == "crn":
+            self.attention = CRN(args)
+        elif args.use_attention == "cbam":
+            self.attention = CBAMBlock(channel=args.features_dim)
+            self.attention.init_weights()
 
         if args.use_gem:
             self.aggregation = nn.Sequential(
                 GeM(p=args.gem_p, eps=args.gem_eps), Flatten(), L2Norm())
-
         elif args.use_netvlad:
             initcache = join(args.datasets_folder, 'centroids_' + str(
                 args.netvlad_clusters) + '_' + str(args.backbone) + '_desc_cen.hdf5')
@@ -43,6 +53,14 @@ class GeoLocalizationNet(nn.Module):
 
     def forward(self, x):
         x = self.backbone(x)
+
+        if self.args.use_attention == "crn":
+            reweight_mask = self.attention(x)
+            if self.args.use_netvlad:
+                self.aggregation.set_reweight_mask(reweight_mask)
+        elif self.args.use_attention == "cbam":
+            x = self.attention(x)
+
         x = self.aggregation(x)
         return x
 
@@ -120,10 +138,13 @@ def get_backbone(args):
             "Cut conv5, Train only conv4 of the ResNet-50, freeze the previous ones")
         layers = list(backbone.children())[:-3]
         backbone = torch.nn.Sequential(*layers)
-    
+
     elif args.backbone == 'resnet50moco-conv5':
         features_dim = 2048
-        backbone = torch.load('moco_v1_200ep_pretrain.pth.tar')
+
+        # Loads the Resnet50 trained by MoCo
+        backbone = load_moco()
+
         for name, child in backbone.named_children():
             if name == "layer4":
                 break
@@ -136,7 +157,10 @@ def get_backbone(args):
 
     elif args.backbone == 'resnet50moco-conv4':
         features_dim = 1024
-        backbone = torch.load('moco_v1_200ep_pretrain.pth.tar')
+
+        # Loads the Resnet50 trained by MoCo
+        backbone = load_moco()
+
         for name, child in backbone.named_children():
             if name == "layer3":
                 break
@@ -147,8 +171,27 @@ def get_backbone(args):
         layers = list(backbone.children())[:-3]
         backbone = torch.nn.Sequential(*layers)
 
-
     args.features_dim = features_dim  # Number of output features from backbone
+    return backbone
+
+
+def load_moco():
+    moco_dim = 128
+
+    new_moco_state_dict = {}
+    moco_state_dict = torch.load(
+        'moco_v1_200ep_pretrain.pth.tar')["state_dict"]
+
+    for k, v in moco_state_dict.items():
+        if "encoder_q" not in k:
+            continue
+        new_k = k.replace("module.encoder_q.", "")
+        new_moco_state_dict[new_k] = v
+    del moco_state_dict
+
+    backbone = torchvision.models.resnet50(num_classes=moco_dim)
+    backbone.load_state_dict(new_moco_state_dict)
+
     return backbone
 
 
